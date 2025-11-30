@@ -1,5 +1,6 @@
 import serial
 import serial.tools.list_ports # <-- FIX: Import the tool to list ports
+from datetime import datetime
 import numpy as np
 import json
 import requests
@@ -26,6 +27,7 @@ class Esp32:
         self.latest_data_eco2 = 0
         self.latest_data_tvoc = 0
         self.latest_data_aqi = 0
+        self.latest_timestamp = None
 
         self.cache_size = cache_size
         self.cache_temp = np.array([], dtype=dict)
@@ -39,7 +41,8 @@ class Esp32:
             "humidity": self.latest_data_humd,
             "eco2": self.latest_data_eco2,
             "tvoc": self.latest_data_tvoc,
-            "aqi": self.latest_data_aqi
+            "aqi": self.latest_data_aqi,
+            "timestamp": self.latest_timestamp
         }
     
     def get_historical_data(self):
@@ -84,6 +87,8 @@ class Esp32:
                 self.latest_data_eco2 = data.get("eco2", 0)
                 self.latest_data_tvoc = data.get("tvoc", 0)
                 self.latest_data_aqi = data.get("aqi", 0)
+                self.latest_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                data["timestamp"] = self.latest_timestamp
                 
                 print(f"Received -> Temp: {self.latest_data_temp:.1f}C, Hum: {self.latest_data_humd:.1f}%, eCO2: {self.latest_data_eco2}ppm, TVOC: {self.latest_data_tvoc}ppb, AQI: {self.latest_data_aqi}")
                 
